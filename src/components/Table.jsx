@@ -1,20 +1,29 @@
 import React, { useState, useMemo } from 'react';
 import { ChevronUpIcon, ChevronDownIcon } from '@heroicons/react/20/solid';
-import { FaFileDownload, FaSearch, FaChevronDown } from 'react-icons/fa';
+import { FaFileDownload, FaSearch, FaChevronDown, FaTrash, FaPlus } from 'react-icons/fa';
 import generateEmployeeData, { getUniqueValues } from '../utils/mockData';
 import Papa from 'papaparse';
 
 const ROWS_PER_PAGE = 8;
-const employeeData = generateEmployeeData(30);
+const initialData = generateEmployeeData(30);
 
 const DataTable = () => {
-  const [data] = useState(employeeData);
+  const [data, setData] = useState(initialData);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
   const [columnFilters, setColumnFilters] = useState({});
   const [columnWidths, setColumnWidths] = useState({});
   const [activeFilter, setActiveFilter] = useState(null);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [newEmployee, setNewEmployee] = useState({
+    name: '',
+    email: '',
+    department: '',
+    location: '',
+    workMode: '',
+    joinYear: new Date().getFullYear().toString()
+  });
 
   // Column display names mapping
   const columnLabels = {
@@ -24,14 +33,42 @@ const DataTable = () => {
     department: 'Department',
     location: 'Office Location',
     workMode: 'Work Mode',
-    joinYear: 'Join Year'
+    joinYear: 'Join Year',
+    actions: 'Actions'
+  };
+
+  // Handle delete
+  const handleDelete = (empId) => {
+    if (window.confirm('Are you sure you want to delete this employee?')) {
+      setData(prevData => prevData.filter(item => item.empId !== empId));
+    }
+  };
+
+  // Handle add
+  const handleAdd = () => {
+    const empId = `AI${String(data.length + 1).padStart(3, '0')}`;
+    const newEmployeeData = {
+      ...newEmployee,
+      empId,
+      email: newEmployee.email || `${newEmployee.name.toLowerCase().replace(' ', '.')}@ai.com`
+    };
+    setData(prevData => [...prevData, newEmployeeData]);
+    setShowAddModal(false);
+    setNewEmployee({
+      name: '',
+      email: '',
+      department: '',
+      location: '',
+      workMode: '',
+      joinYear: new Date().getFullYear().toString()
+    });
   };
 
   // Get unique values for each filterable column
   const uniqueValues = useMemo(() => {
     const result = {};
-    Object.keys(data[0]).forEach(column => {
-      if (!['email'].includes(column)) {
+    Object.keys(data[0] || {}).forEach(column => {
+      if (!['email', 'empId', 'actions'].includes(column)) {
         result[column] = getUniqueValues(data, column);
       }
     });
@@ -116,7 +153,7 @@ const DataTable = () => {
 
   return (
     <div className="p-4 max-w-7xl mx-auto">
-      {/* Search and Export */}
+      {/* Search and Actions */}
       <div className="mb-6 flex flex-col sm:flex-row justify-between gap-4">
         <div className="relative flex-1">
           <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
@@ -128,13 +165,22 @@ const DataTable = () => {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-        <button
-          onClick={exportToCSV}
-          className="flex items-center justify-center gap-2 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
-        >
-          <FaFileDownload />
-          Export to CSV
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="flex items-center justify-center gap-2 bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors"
+          >
+            <FaPlus />
+            Add Employee
+          </button>
+          <button
+            onClick={exportToCSV}
+            className="flex items-center justify-center gap-2 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+          >
+            <FaFileDownload />
+            Export to CSV
+          </button>
+        </div>
       </div>
 
       {/* Table */}
@@ -204,6 +250,7 @@ const DataTable = () => {
                   </div>
                 </th>
               ))}
+              <th key="actions" className="border-b p-2 bg-sky-100"></th>
             </tr>
             {/* Header row */}
             <tr>
@@ -246,6 +293,7 @@ const DataTable = () => {
                   />
                 </th>
               ))}
+              <th key="actions" className="border-b p-3 bg-sky-100 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer select-none relative"></th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
@@ -256,11 +304,104 @@ const DataTable = () => {
                     {item[key]}
                   </td>
                 ))}
+                <td className="p-3 text-sm">
+                  <button
+                    onClick={() => handleDelete(item.empId)}
+                    className="text-red-500 hover:text-red-700 transition-colors"
+                    title="Delete"
+                  >
+                    <FaTrash />
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+
+      {/* Add Employee Modal */}
+      {showAddModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full">
+            <h2 className="text-xl font-semibold mb-4">Add New Employee</h2>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Name</label>
+                <input
+                  type="text"
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  value={newEmployee.name}
+                  onChange={(e) => setNewEmployee({...newEmployee, name: e.target.value})}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Email</label>
+                <input
+                  type="email"
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  value={newEmployee.email}
+                  onChange={(e) => setNewEmployee({...newEmployee, email: e.target.value})}
+                  placeholder="Optional - will be generated from name if empty"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Department</label>
+                <select
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  value={newEmployee.department}
+                  onChange={(e) => setNewEmployee({...newEmployee, department: e.target.value})}
+                >
+                  <option value="">Select Department</option>
+                  {uniqueValues.department?.map(dept => (
+                    <option key={dept} value={dept}>{dept}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Location</label>
+                <select
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  value={newEmployee.location}
+                  onChange={(e) => setNewEmployee({...newEmployee, location: e.target.value})}
+                >
+                  <option value="">Select Location</option>
+                  {uniqueValues.location?.map(loc => (
+                    <option key={loc} value={loc}>{loc}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Work Mode</label>
+                <select
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  value={newEmployee.workMode}
+                  onChange={(e) => setNewEmployee({...newEmployee, workMode: e.target.value})}
+                >
+                  <option value="">Select Work Mode</option>
+                  {uniqueValues.workMode?.map(mode => (
+                    <option key={mode} value={mode}>{mode}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                onClick={() => setShowAddModal(false)}
+                className="px-4 py-2 border rounded-md hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleAdd}
+                disabled={!newEmployee.name || !newEmployee.department || !newEmployee.location || !newEmployee.workMode}
+                className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Add Employee
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Pagination */}
       <div className="mt-6 flex flex-col sm:flex-row justify-between items-center gap-4">
