@@ -17,7 +17,7 @@ function App() {
       </main>
       <footer className="py-4 px-4 mt-8">
         <p className="text-center text-gray-600 text-sm">
-          {new Date().getFullYear()} Adalat AI. All rights reserved.
+          {new Date().getFullYear()} AI. All rights reserved.
         </p>
       </footer>
     </div>

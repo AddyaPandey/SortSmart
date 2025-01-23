@@ -7,7 +7,7 @@ const generateIndianName = () => {
 
 // Helper function to generate company email
 const generateEmail = (name) => {
-  const companyDomain = 'adalat.ai';
+  const companyDomain = 'ai.com';
   return `${name.toLowerCase().replace(' ', '.')}@${companyDomain}`;
 };
 
