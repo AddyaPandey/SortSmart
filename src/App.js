@@ -9,7 +9,7 @@ function App() {
           SortSmart
         </h1>
         <p className="text-center text-gray-600 mt-2">
-          Manage and explore our talent database
+          Manage and explore
         </p>
       </header>
       <main>
