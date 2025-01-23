@@ -7,7 +7,7 @@ const generateIndianName = () => {
 
 // Helper function to generate company email
 const generateEmail = (name) => {
-  const companyDomain = 'techindia.com';
+  const companyDomain = 'adalat.ai';
   return `${name.toLowerCase().replace(' ', '.')}@${companyDomain}`;
 };
 
@@ -24,7 +24,7 @@ const generateEmployeeData = (count = 30) => {
     const joinYear = (startYear + Math.floor(Math.random() * (currentYear - startYear + 1))).toString();
     
     data.push({
-      empId: `TI${String(i + 1).padStart(3, '0')}`,
+      empId: `AI${String(i + 1).padStart(3, '0')}`,
       name: name,
       email: generateEmail(name),
       department: techDepartments[Math.floor(Math.random() * techDepartments.length)],

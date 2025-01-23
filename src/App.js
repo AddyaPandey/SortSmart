@@ -6,10 +6,10 @@ function App() {
     <div className="min-h-screen bg-gradient-to-b from-sky-50 to-white">
       <header className="py-6 px-4">
         <h1 className="text-3xl font-semibold text-center text-gray-800">
-          Tech India Employee Directory
+          SortSmart
         </h1>
         <p className="text-center text-gray-600 mt-2">
-          Manage and explore our tech talent across India
+          Manage and explore our talent database
         </p>
       </header>
       <main>
@@ -17,7 +17,7 @@ function App() {
       </main>
       <footer className="py-4 px-4 mt-8">
         <p className="text-center text-gray-600 text-sm">
-          {new Date().getFullYear()} Tech India. All rights reserved.
+          {new Date().getFullYear()} Adalat AI. All rights reserved.
         </p>
       </footer>
     </div>
