@@ -1,27 +1,37 @@
 import React, { useState, useMemo } from 'react';
 import { ChevronUpIcon, ChevronDownIcon } from '@heroicons/react/20/solid';
 import { FaFileDownload, FaSearch, FaChevronDown } from 'react-icons/fa';
-import generateMockData, { getUniqueValues } from '../utils/mockData';
+import generateEmployeeData, { getUniqueValues } from '../utils/mockData';
 import Papa from 'papaparse';
 
-const ITEMS_PER_PAGE = 10;
+const ROWS_PER_PAGE = 8;
+const employeeData = generateEmployeeData(30);
 
-const mockData = generateMockData(30);
-
-const Table = () => {
-  const [data] = useState(mockData);
+const DataTable = () => {
+  const [data] = useState(employeeData);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
   const [currentPage, setCurrentPage] = useState(1);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filters, setFilters] = useState({});
+  const [searchQuery, setSearchQuery] = useState('');
+  const [columnFilters, setColumnFilters] = useState({});
   const [columnWidths, setColumnWidths] = useState({});
-  const [activeDropdown, setActiveDropdown] = useState(null);
+  const [activeFilter, setActiveFilter] = useState(null);
 
-  // Get unique values for each column
+  // Column display names mapping
+  const columnLabels = {
+    empId: 'Employee ID',
+    name: 'Name',
+    email: 'Email',
+    department: 'Department',
+    location: 'Office Location',
+    workMode: 'Work Mode',
+    joinYear: 'Join Year'
+  };
+
+  // Get unique values for each filterable column
   const uniqueValues = useMemo(() => {
     const result = {};
     Object.keys(data[0]).forEach(column => {
-      if (!['id', 'email'].includes(column)) {
+      if (!['email'].includes(column)) {
         result[column] = getUniqueValues(data, column);
       }
     });
@@ -53,28 +63,28 @@ const Table = () => {
   // Filtering logic
   const filteredData = useMemo(() => {
     return sortedData.filter(item => {
-      // Search filter
+      // Global search
       const matchesSearch = Object.values(item).some(
-        value => value.toString().toLowerCase().includes(searchTerm.toLowerCase())
+        value => value.toString().toLowerCase().includes(searchQuery.toLowerCase())
       );
 
       // Column filters
-      const matchesFilters = Object.entries(filters).every(([key, value]) => {
+      const matchesFilters = Object.entries(columnFilters).every(([key, value]) => {
         if (!value) return true;
         return item[key].toString().toLowerCase().includes(value.toLowerCase());
       });
 
       return matchesSearch && matchesFilters;
     });
-  }, [sortedData, searchTerm, filters]);
+  }, [sortedData, searchQuery, columnFilters]);
 
   // Pagination
   const paginatedData = useMemo(() => {
-    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-    return filteredData.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+    const startIndex = (currentPage - 1) * ROWS_PER_PAGE;
+    return filteredData.slice(startIndex, startIndex + ROWS_PER_PAGE);
   }, [filteredData, currentPage]);
 
-  const pageCount = Math.ceil(filteredData.length / ITEMS_PER_PAGE);
+  const pageCount = Math.ceil(filteredData.length / ROWS_PER_PAGE);
 
   // Column resize handler
   const handleColumnResize = (column, width) => {
@@ -84,14 +94,22 @@ const Table = () => {
     }));
   };
 
-  // Export to CSV
+  // Export to CSV with formatted headers
   const exportToCSV = () => {
-    const csv = Papa.unparse(filteredData);
+    const formattedData = filteredData.map(item => {
+      const formattedItem = {};
+      Object.keys(item).forEach(key => {
+        formattedItem[columnLabels[key]] = item[key];
+      });
+      return formattedItem;
+    });
+
+    const csv = Papa.unparse(formattedData);
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = 'table-data.csv';
+    link.download = 'employee-data.csv';
     link.click();
     window.URL.revokeObjectURL(url);
   };
@@ -106,8 +124,8 @@ const Table = () => {
             type="text"
             placeholder="Search anything..."
             className="w-full pl-10 p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
         <button
@@ -128,13 +146,13 @@ const Table = () => {
               {Object.keys(data[0]).map(column => (
                 <th key={`filter-${column}`} className="border-b p-2 bg-sky-100">
                   <div className="relative">
-                    {['id', 'email'].includes(column) ? (
+                    {column === 'email' ? (
                       <input
                         type="text"
-                        placeholder={`Filter ${column}`}
+                        placeholder="Filter email..."
                         className="w-full p-1 text-sm border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
-                        value={filters[column] || ''}
-                        onChange={(e) => setFilters(prev => ({
+                        value={columnFilters[column] || ''}
+                        onChange={(e) => setColumnFilters(prev => ({
                           ...prev,
                           [column]: e.target.value
                         }))}
@@ -143,23 +161,23 @@ const Table = () => {
                       <>
                         <button
                           className="w-full p-1 text-sm border rounded bg-white flex items-center justify-between"
-                          onClick={() => setActiveDropdown(activeDropdown === column ? null : column)}
+                          onClick={() => setActiveFilter(activeFilter === column ? null : column)}
                         >
                           <span>
-                            {filters[column] || `Filter ${column === 'joinYear' ? 'Year' : column}`}
+                            {columnFilters[column] || `Filter ${columnLabels[column]}`}
                           </span>
-                          <FaChevronDown className={`transition-transform ${activeDropdown === column ? 'rotate-180' : ''}`} />
+                          <FaChevronDown className={`transition-transform ${activeFilter === column ? 'rotate-180' : ''}`} />
                         </button>
-                        {activeDropdown === column && (
+                        {activeFilter === column && (
                           <div className="absolute z-10 mt-1 w-full bg-white border rounded-lg shadow-lg max-h-48 overflow-y-auto">
                             <div 
                               className="p-1 hover:bg-sky-50 cursor-pointer text-sm"
                               onClick={() => {
-                                setFilters(prev => ({
+                                setColumnFilters(prev => ({
                                   ...prev,
                                   [column]: ''
                                 }));
-                                setActiveDropdown(null);
+                                setActiveFilter(null);
                               }}
                             >
                               Show All
@@ -169,11 +187,11 @@ const Table = () => {
                                 key={value}
                                 className="p-1 hover:bg-sky-50 cursor-pointer text-sm"
                                 onClick={() => {
-                                  setFilters(prev => ({
+                                  setColumnFilters(prev => ({
                                     ...prev,
                                     [column]: value
                                   }));
-                                  setActiveDropdown(null);
+                                  setActiveFilter(null);
                                 }}
                               >
                                 {value}
@@ -200,7 +218,7 @@ const Table = () => {
                       key: column,
                       direction: sortConfig.key === column && sortConfig.direction === 'asc' ? 'desc' : 'asc'
                     })}>
-                    {column === 'joinYear' ? 'Join Year' : column}
+                    {columnLabels[column]}
                     <div className="flex flex-col">
                       <ChevronUpIcon className={`w-3 h-3 ${sortConfig.key === column && sortConfig.direction === 'asc' ? 'text-blue-500' : 'text-gray-400'}`} />
                       <ChevronDownIcon className={`w-3 h-3 -mt-1 ${sortConfig.key === column && sortConfig.direction === 'desc' ? 'text-blue-500' : 'text-gray-400'}`} />
@@ -232,10 +250,10 @@ const Table = () => {
           </thead>
           <tbody className="divide-y divide-gray-200">
             {paginatedData.map(item => (
-              <tr key={item.id} className="hover:bg-gray-50 transition-colors">
-                {Object.entries(item).map(([key, value]) => (
+              <tr key={item.empId} className="hover:bg-sky-50 transition-colors">
+                {Object.keys(item).map(key => (
                   <td key={key} className="p-3 text-sm">
-                    {value}
+                    {item[key]}
                   </td>
                 ))}
               </tr>
@@ -247,7 +265,7 @@ const Table = () => {
       {/* Pagination */}
       <div className="mt-6 flex flex-col sm:flex-row justify-between items-center gap-4">
         <div className="text-sm text-gray-700">
-          Showing {((currentPage - 1) * ITEMS_PER_PAGE) + 1} to {Math.min(currentPage * ITEMS_PER_PAGE, filteredData.length)} of {filteredData.length} entries
+          Showing {((currentPage - 1) * ROWS_PER_PAGE) + 1} to {Math.min(currentPage * ROWS_PER_PAGE, filteredData.length)} of {filteredData.length} entries
         </div>
         <div className="flex gap-2">
           <button
@@ -279,4 +297,4 @@ const Table = () => {
   );
 };
 
-export default Table;
+export default DataTable;

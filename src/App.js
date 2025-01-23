@@ -1,13 +1,25 @@
 import React from 'react';
-import Table from './components/Table';
+import DataTable from './components/Table';
 
 function App() {
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-4xl font-bold mb-6 text-center text-gray-800">
-        SortSmart
-      </h1>
-      <Table />
+    <div className="min-h-screen bg-gradient-to-b from-sky-50 to-white">
+      <header className="py-6 px-4">
+        <h1 className="text-3xl font-semibold text-center text-gray-800">
+          Tech India Employee Directory
+        </h1>
+        <p className="text-center text-gray-600 mt-2">
+          Manage and explore our tech talent across India
+        </p>
+      </header>
+      <main>
+        <DataTable />
+      </main>
+      <footer className="py-4 px-4 mt-8">
+        <p className="text-center text-gray-600 text-sm">
+          {new Date().getFullYear()} Tech India. All rights reserved.
+        </p>
+      </footer>
     </div>
   );
 }

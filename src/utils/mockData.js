@@ -1,31 +1,55 @@
-const generateMockData = (count = 30) => {
+// Helper function to generate random Indian names
+const generateIndianName = () => {
+  const firstNames = ['Aarav', 'Aditi', 'Arjun', 'Diya', 'Ishaan', 'Kavya', 'Neha', 'Pranav', 'Riya', 'Vihaan'];
+  const lastNames = ['Sharma', 'Patel', 'Kumar', 'Singh', 'Gupta', 'Verma', 'Malhotra', 'Reddy', 'Mehta', 'Joshi'];
+  return `${firstNames[Math.floor(Math.random() * firstNames.length)]} ${lastNames[Math.floor(Math.random() * lastNames.length)]}`;
+};
+
+// Helper function to generate company email
+const generateEmail = (name) => {
+  const companyDomain = 'techindia.com';
+  return `${name.toLowerCase().replace(' ', '.')}@${companyDomain}`;
+};
+
+const generateEmployeeData = (count = 30) => {
   const data = [];
-  const departments = ['Engineering', 'Marketing', 'Sales', 'HR', 'Finance'];
-  const locations = ['Mumbai', 'Bangalore', 'Delhi', 'Hyderabad', 'Pune', 'Chennai'];
-  const status = ['Active', 'On Leave', 'Contract', 'Remote'];
-  const years = [2020, 2021, 2022, 2023, 2024];
+  const techDepartments = ['Frontend Dev', 'Backend Dev', 'UI/UX Design', 'QA Testing', 'DevOps'];
+  const indianOffices = ['Mumbai-HQ', 'Bangalore-TC', 'Delhi-NC', 'Hyderabad-TC', 'Pune-IT', 'Chennai-TP'];
+  const workModes = ['In-Office', 'Remote', 'Hybrid', 'On-Site'];
+  const startYear = 2020;
+  const currentYear = new Date().getFullYear();
 
   for (let i = 0; i < count; i++) {
-    const year = years[Math.floor(Math.random() * years.length)];
+    const name = generateIndianName();
+    const joinYear = (startYear + Math.floor(Math.random() * (currentYear - startYear + 1))).toString();
+    
     data.push({
-      id: i + 1,
-      name: `Employee ${i + 1}`,
-      email: `employee${i + 1}@company.com`,
-      department: departments[Math.floor(Math.random() * departments.length)],
-      location: locations[Math.floor(Math.random() * locations.length)],
-      status: status[Math.floor(Math.random() * status.length)],
-      joinYear: year.toString()
+      empId: `TI${String(i + 1).padStart(3, '0')}`,
+      name: name,
+      email: generateEmail(name),
+      department: techDepartments[Math.floor(Math.random() * techDepartments.length)],
+      location: indianOffices[Math.floor(Math.random() * indianOffices.length)],
+      workMode: workModes[Math.floor(Math.random() * workModes.length)],
+      joinYear: joinYear
     });
   }
   return data;
 };
 
-// Helper function to get unique values for a column
+// Get unique values for filtering, with custom sorting for different types
 export const getUniqueValues = (data, column) => {
-  if (column === 'joinYear') {
-    return [...new Set(data.map(item => item[column]))].sort((a, b) => b - a); // Sort years in descending order
+  const values = [...new Set(data.map(item => item[column]))];
+  
+  switch(column) {
+    case 'joinYear':
+      return values.sort((a, b) => b - a); // Newest first
+    case 'location':
+      return values.sort((a, b) => a.localeCompare(b)); // Alphabetical
+    case 'empId':
+      return values.sort(); // Default sorting
+    default:
+      return values.sort((a, b) => a.localeCompare(b));
   }
-  return [...new Set(data.map(item => item[column]))].sort();
 };
 
-export default generateMockData;
+export default generateEmployeeData;
