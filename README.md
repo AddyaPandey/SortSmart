@@ -1,6 +1,7 @@
 SortSmart- Interactive Data Table
 A modern, responsive data table solution built with React.js and TailwindCSS.
 
+
 Features
 - Smart global search across all columns
 - Column-specific filters with dropdowns
@@ -11,10 +12,12 @@ Features
 - Pagination
 - Clean, modern UI with light sky blue theme
 
+
 Tech Stack
 - React.js
 - TailwindCSS
 - PapaParse (CSV export)
+
 
 Quick Start
 1. Clone the repository:
@@ -31,6 +34,7 @@ Quick Start
    npm start
    ```
 4. Open [http://localhost:3000](http://localhost:3000) in your browser
+
 
 Usage
 Search
@@ -51,9 +55,10 @@ Sorting
 - Click again to reverse sort order
 - Visual indicators show current sort direction
 
+
 Export
 - Click "Export to CSV" to download current filtered data
 
-Contributing
 
-Contributions, issues, and feature requests are welcome!
+Contributing
+- Contributions, issues, and feature requests are welcome!
