@@ -28,14 +28,48 @@ const DataTable = () => {
 
   // Column display names mapping
   const columnLabels = {
-    empId: 'Employee ID',
+    empId: 'EmpID',
     name: 'Name',
     email: 'Email',
     department: 'Department',
-    location: 'Office Location',
-    workMode: 'Work Mode',
-    joinYear: 'Join Year',
+    location: 'Location',
+    workMode: 'WorkMode',
+    joinYear: 'JoinYear',
     actions: 'Actions'
+  };
+
+  // Filter labels mapping
+  const filterLabels = {
+    department: {
+      'Frontend Dev': 'FrontendDev',
+      'Backend Dev': 'BackendDev',
+      'UI/UX Design': 'UX/UI',
+      'QA Testing': 'QA',
+      'DevOps': 'DevOps'
+    },
+    workMode: {
+      'In-Office': 'InOffice',
+      'Remote': 'Remote',
+      'Hybrid': 'Hybrid',
+      'On-Site': 'OnSite'
+    }
+  };
+
+  // Convert filter value to display value
+  const getFilterDisplayValue = (column, value) => {
+    if (filterLabels[column] && filterLabels[column][value]) {
+      return filterLabels[column][value];
+    }
+    return value;
+  };
+
+  // Convert display value back to actual value
+  const getActualFilterValue = (column, displayValue) => {
+    if (filterLabels[column]) {
+      const entry = Object.entries(filterLabels[column]).find(([_, display]) => display === displayValue);
+      if (entry) return entry[0];
+    }
+    return displayValue;
   };
 
   // Handle delete
@@ -250,7 +284,9 @@ const DataTable = () => {
                           onClick={() => setActiveFilter(activeFilter === column ? null : column)}
                         >
                           <span className="text-gray-600 font-medium">
-                            {columnFilters[column] ? `${columnFilters[column]}` : `All ${columnLabels[column]}`}
+                            {columnFilters[column] 
+                              ? getFilterDisplayValue(column, columnFilters[column])
+                              : `All${columnLabels[column]}`}
                           </span>
                           <FaChevronDown className={`ml-2 text-gray-400 transform transition-transform ${
                             activeFilter === column ? 'rotate-180' : ''
@@ -268,27 +304,30 @@ const DataTable = () => {
                                   setActiveFilter(null);
                                 }}
                               >
-                                Show All
+                                All{columnLabels[column]}
                               </button>
-                              {uniqueValues[column]?.map(value => (
-                                <button
-                                  key={value}
-                                  className={`block w-full px-4 py-2 text-sm text-left ${
-                                    columnFilters[column] === value
-                                      ? 'bg-sky-50 text-sky-700 font-medium'
-                                      : 'text-gray-700 hover:bg-gray-50'
-                                  }`}
-                                  onClick={() => {
-                                    setColumnFilters(prev => ({
-                                      ...prev,
-                                      [column]: value
-                                    }));
-                                    setActiveFilter(null);
-                                  }}
-                                >
-                                  {value}
-                                </button>
-                              ))}
+                              {uniqueValues[column]?.map(value => {
+                                const displayValue = getFilterDisplayValue(column, value);
+                                return (
+                                  <button
+                                    key={value}
+                                    className={`block w-full px-4 py-2 text-sm text-left ${
+                                      columnFilters[column] === value
+                                        ? 'bg-sky-50 text-sky-700 font-medium'
+                                        : 'text-gray-700 hover:bg-gray-50'
+                                    }`}
+                                    onClick={() => {
+                                      setColumnFilters(prev => ({
+                                        ...prev,
+                                        [column]: value
+                                      }));
+                                      setActiveFilter(null);
+                                    }}
+                                  >
+                                    {displayValue}
+                                  </button>
+                                );
+                              })}
                             </div>
                           </div>
                         )}
