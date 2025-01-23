@@ -14,7 +14,7 @@ const generateEmail = (name) => {
 const generateEmployeeData = (count = 30) => {
   const data = [];
   const techDepartments = ['Frontend Dev', 'Backend Dev', 'UI/UX Design', 'QA Testing', 'DevOps'];
-  const indianOffices = ['Mumbai-HQ', 'Bangalore-TC', 'Delhi-NC', 'Hyderabad-TC', 'Pune-IT', 'Chennai-TP'];
+  const indianOffices = ['Mumbai', 'Bangalore', 'Delhi', 'Hyderabad', 'Pune', 'Chennai'];
   const workModes = ['In-Office', 'Remote', 'Hybrid', 'On-Site'];
   const startYear = 2020;
   const currentYear = new Date().getFullYear();
