@@ -16,6 +16,7 @@ const DataTable = () => {
   const [columnWidths, setColumnWidths] = useState({});
   const [activeFilter, setActiveFilter] = useState(null);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [selectedRows, setSelectedRows] = useState(new Set());
   const [newEmployee, setNewEmployee] = useState({
     name: '',
     email: '',
@@ -62,6 +63,29 @@ const DataTable = () => {
       workMode: '',
       joinYear: new Date().getFullYear().toString()
     });
+  };
+
+  // Handle row selection
+  const toggleRowSelection = (empId) => {
+    const newSelected = new Set(selectedRows);
+    if (newSelected.has(empId)) {
+      newSelected.delete(empId);
+    } else {
+      newSelected.add(empId);
+    }
+    setSelectedRows(newSelected);
+  };
+
+  // Handle delete selected
+  const handleDeleteSelected = () => {
+    if (selectedRows.size === 0) {
+      alert('Please select rows to delete');
+      return;
+    }
+    if (window.confirm(`Are you sure you want to delete ${selectedRows.size} selected employee(s)?`)) {
+      setData(prevData => prevData.filter(item => !selectedRows.has(item.empId)));
+      setSelectedRows(new Set());
+    }
   };
 
   // Get unique values for each filterable column
@@ -153,7 +177,7 @@ const DataTable = () => {
 
   return (
     <div className="p-4 max-w-7xl mx-auto">
-      {/* Search and Export */}
+      {/* Search and Actions */}
       <div className="mb-6 flex flex-col sm:flex-row justify-between gap-4">
         <div className="relative flex-1">
           <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
@@ -165,13 +189,15 @@ const DataTable = () => {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-        <button
-          onClick={exportToCSV}
-          className="flex items-center justify-center gap-2 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
-        >
-          <FaFileDownload />
-          Export to CSV
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={exportToCSV}
+            className="flex items-center justify-center gap-2 bg-amber-600 text-white px-4 py-2 rounded-lg hover:bg-amber-700 transition-colors"
+          >
+            <FaFileDownload />
+            Export to CSV
+          </button>
+        </div>
       </div>
 
       {/* Table */}
@@ -295,28 +321,32 @@ const DataTable = () => {
                 </th>
               ))}
               <th key="actions" className="border-b p-3 bg-sky-100 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Actions
+                <button
+                  onClick={handleDeleteSelected}
+                  className="text-red-500 hover:text-red-700 transition-colors"
+                  title="Delete Selected"
+                >
+                  <FaTrash />
+                </button>
               </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
             {paginatedData.map(item => (
-              <tr key={item.empId} className="hover:bg-sky-50 transition-colors">
+              <tr 
+                key={item.empId} 
+                className={`hover:bg-sky-50 transition-colors cursor-pointer ${
+                  selectedRows.has(item.empId) ? 'bg-sky-100' : ''
+                }`}
+                onClick={() => toggleRowSelection(item.empId)}
+              >
                 <td className="p-3 text-sm"></td>
                 {Object.keys(item).map(key => (
                   <td key={key} className="p-3 text-sm">
                     {item[key]}
                   </td>
                 ))}
-                <td className="p-3 text-sm">
-                  <button
-                    onClick={() => handleDelete(item.empId)}
-                    className="text-red-500 hover:text-red-700 transition-colors"
-                    title="Delete"
-                  >
-                    <FaTrash />
-                  </button>
-                </td>
+                <td className="p-3 text-sm"></td>
               </tr>
             ))}
           </tbody>
