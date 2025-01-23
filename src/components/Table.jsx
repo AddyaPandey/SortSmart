@@ -175,6 +175,13 @@ const DataTable = () => {
     window.URL.revokeObjectURL(url);
   };
 
+  const handleSort = (column) => {
+    setSortConfig({
+      key: column,
+      direction: sortConfig.key === column && sortConfig.direction === 'asc' ? 'desc' : 'asc'
+    });
+  };
+
   return (
     <div className="p-4 max-w-7xl mx-auto">
       {/* Search and Actions */}
@@ -210,47 +217,41 @@ const DataTable = () => {
               <th key="add-header" className="border-b p-2 bg-sky-100"></th>
               {Object.keys(data[0]).map(column => (
                 <th key={`filter-${column}`} className="border-b p-2 bg-sky-100">
-                  <div className="relative">
-                    {column === 'email' ? (
-                      <input
-                        type="text"
-                        placeholder="Filter email..."
-                        className="w-full p-1 text-sm border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
-                        value={columnFilters[column] || ''}
-                        onChange={(e) => setColumnFilters(prev => ({
-                          ...prev,
-                          [column]: e.target.value
-                        }))}
-                      />
-                    ) : (
-                      <>
-                        <button
-                          className="w-full p-1 text-sm border rounded bg-white flex items-center justify-between"
-                          onClick={() => setActiveFilter(activeFilter === column ? null : column)}
-                        >
-                          <span>
-                            {columnFilters[column] || `Filter ${columnLabels[column]}`}
-                          </span>
-                          <FaChevronDown className={`transition-transform ${activeFilter === column ? 'rotate-180' : ''}`} />
-                        </button>
-                        {activeFilter === column && (
-                          <div className="absolute z-10 mt-1 w-full bg-white border rounded-lg shadow-lg max-h-48 overflow-y-auto">
-                            <div 
-                              className="p-1 hover:bg-sky-50 cursor-pointer text-sm"
+                  {!['email', 'empId'].includes(column) && (
+                    <div className="relative">
+                      <button
+                        className="flex items-center justify-between w-full px-2 py-1 text-xs bg-white border rounded hover:bg-gray-50"
+                        onClick={() => setActiveFilter(activeFilter === column ? null : column)}
+                      >
+                        <span className="text-gray-600">
+                          {columnFilters[column] ? `Filter: ${columnFilters[column]}` : 'Filter'}
+                        </span>
+                        <FaChevronDown className={`ml-1 transform transition-transform ${
+                          activeFilter === column ? 'rotate-180' : ''
+                        }`} />
+                      </button>
+                      {activeFilter === column && (
+                        <div className="absolute z-10 w-48 mt-1 bg-white rounded-md shadow-lg">
+                          <div className="py-1">
+                            <button
+                              className="block w-full px-4 py-2 text-sm text-left text-gray-700 hover:bg-gray-100"
                               onClick={() => {
-                                setColumnFilters(prev => ({
-                                  ...prev,
-                                  [column]: ''
-                                }));
+                                const newFilters = { ...columnFilters };
+                                delete newFilters[column];
+                                setColumnFilters(newFilters);
                                 setActiveFilter(null);
                               }}
                             >
-                              Show All
-                            </div>
-                            {uniqueValues[column].map(value => (
-                              <div
+                              Clear Filter
+                            </button>
+                            {uniqueValues[column]?.map(value => (
+                              <button
                                 key={value}
-                                className="p-1 hover:bg-sky-50 cursor-pointer text-sm"
+                                className={`block w-full px-4 py-2 text-sm text-left ${
+                                  columnFilters[column] === value
+                                    ? 'bg-blue-50 text-blue-700'
+                                    : 'text-gray-700 hover:bg-gray-100'
+                                }`}
                                 onClick={() => {
                                   setColumnFilters(prev => ({
                                     ...prev,
@@ -260,13 +261,13 @@ const DataTable = () => {
                                 }}
                               >
                                 {value}
-                              </div>
+                              </button>
                             ))}
                           </div>
-                        )}
-                      </>
-                    )}
-                  </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </th>
               ))}
               <th key="delete-header" className="border-b p-2 bg-sky-100"></th>
@@ -286,39 +287,15 @@ const DataTable = () => {
                 <th
                   key={column}
                   className="border-b p-3 bg-sky-100 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer select-none relative"
+                  onClick={() => handleSort(column)}
                   style={{ width: columnWidths[column] }}
                 >
-                  <div className="flex items-center justify-between gap-2"
-                    onClick={() => setSortConfig({
-                      key: column,
-                      direction: sortConfig.key === column && sortConfig.direction === 'asc' ? 'desc' : 'asc'
-                    })}>
+                  <div className="flex items-center gap-2">
                     {columnLabels[column]}
-                    <div className="flex flex-col">
-                      <ChevronUpIcon className={`w-3 h-3 ${sortConfig.key === column && sortConfig.direction === 'asc' ? 'text-blue-500' : 'text-gray-400'}`} />
-                      <ChevronDownIcon className={`w-3 h-3 -mt-1 ${sortConfig.key === column && sortConfig.direction === 'desc' ? 'text-blue-500' : 'text-gray-400'}`} />
-                    </div>
+                    {sortConfig.key === column && (
+                      sortConfig.direction === 'asc' ? <ChevronUpIcon className="w-4 h-4" /> : <ChevronDownIcon className="w-4 h-4" />
+                    )}
                   </div>
-                  <div
-                    className="absolute right-0 top-0 h-full w-1 cursor-col-resize bg-gray-300 opacity-0 hover:opacity-100"
-                    onMouseDown={e => {
-                      const startX = e.pageX;
-                      const startWidth = e.target.parentElement.offsetWidth;
-
-                      const handleMouseMove = (e) => {
-                        const width = startWidth + (e.pageX - startX);
-                        handleColumnResize(column, Math.max(width, 100));
-                      };
-
-                      const handleMouseUp = () => {
-                        document.removeEventListener('mousemove', handleMouseMove);
-                        document.removeEventListener('mouseup', handleMouseUp);
-                      };
-
-                      document.addEventListener('mousemove', handleMouseMove);
-                      document.addEventListener('mouseup', handleMouseUp);
-                    }}
-                  />
                 </th>
               ))}
               <th key="actions" className="border-b p-3 bg-sky-100 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
