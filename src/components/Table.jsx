@@ -302,15 +302,7 @@ const DataTable = () => {
           <tbody className="divide-y divide-gray-200">
             {paginatedData.map(item => (
               <tr key={item.empId} className="hover:bg-sky-50 transition-colors">
-                <td className="p-3 text-sm">
-                  <button
-                    onClick={() => setShowAddModal(true)}
-                    className="text-green-500 hover:text-green-700 transition-colors"
-                    title="Add Employee"
-                  >
-                    <FaPlus />
-                  </button>
-                </td>
+                <td className="p-3 text-sm"></td>
                 {Object.keys(item).map(key => (
                   <td key={key} className="p-3 text-sm">
                     {item[key]}
