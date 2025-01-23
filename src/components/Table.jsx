@@ -125,17 +125,24 @@ const DataTable = () => {
   const filteredData = useMemo(() => {
     return sortedData.filter(item => {
       // Global search
-      const matchesSearch = Object.values(item).some(
-        value => value.toString().toLowerCase().includes(searchQuery.toLowerCase())
-      );
+      if (searchQuery && !Object.values(item).some(value => 
+        value.toString().toLowerCase().includes(searchQuery.toLowerCase())
+      )) {
+        return false;
+      }
 
       // Column filters
-      const matchesFilters = Object.entries(columnFilters).every(([key, value]) => {
+      return Object.entries(columnFilters).every(([key, value]) => {
         if (!value) return true;
-        return item[key].toString().toLowerCase().includes(value.toLowerCase());
+        
+        // For email and empId, use includes for partial matching
+        if (['email', 'empId'].includes(key)) {
+          return item[key].toLowerCase().includes(value.toLowerCase());
+        }
+        
+        // For other columns, use exact matching
+        return item[key] === value;
       });
-
-      return matchesSearch && matchesFilters;
     });
   }, [sortedData, searchQuery, columnFilters]);
 
@@ -224,57 +231,70 @@ const DataTable = () => {
               </th>
               {Object.keys(data[0]).map(column => (
                 <th key={`filter-${column}`} className="border-b p-2 bg-sky-100">
-                  {!['email', 'empId'].includes(column) && (
-                    <div className="relative px-3">
-                      <button
-                        className="flex items-center justify-between w-full px-3 py-1.5 text-xs bg-white border rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-colors"
-                        onClick={() => setActiveFilter(activeFilter === column ? null : column)}
-                      >
-                        <span className="text-gray-600 font-medium">
-                          {columnFilters[column] ? `${columnFilters[column]}` : `All ${columnLabels[column]}`}
-                        </span>
-                        <FaChevronDown className={`ml-2 text-gray-400 transform transition-transform ${
-                          activeFilter === column ? 'rotate-180' : ''
-                        }`} />
-                      </button>
-                      {activeFilter === column && (
-                        <div className="absolute z-10 w-56 mt-1 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5">
-                          <div className="py-1">
-                            <button
-                              className="block w-full px-4 py-2 text-sm text-left text-gray-700 hover:bg-gray-100 border-b border-gray-100"
-                              onClick={() => {
-                                const newFilters = { ...columnFilters };
-                                delete newFilters[column];
-                                setColumnFilters(newFilters);
-                                setActiveFilter(null);
-                              }}
-                            >
-                              Show All
-                            </button>
-                            {uniqueValues[column]?.map(value => (
+                  <div className="relative px-3">
+                    {['email', 'empId'].includes(column) ? (
+                      <input
+                        type="text"
+                        placeholder={`Search ${columnLabels[column]}...`}
+                        className="w-full px-3 py-1.5 text-xs bg-white border rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-colors"
+                        value={columnFilters[column] || ''}
+                        onChange={(e) => setColumnFilters(prev => ({
+                          ...prev,
+                          [column]: e.target.value
+                        }))}
+                      />
+                    ) : !['email', 'empId'].includes(column) && (
+                      <>
+                        <button
+                          className="flex items-center justify-between w-full px-3 py-1.5 text-xs bg-white border rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-colors"
+                          onClick={() => setActiveFilter(activeFilter === column ? null : column)}
+                        >
+                          <span className="text-gray-600 font-medium">
+                            {columnFilters[column] ? `${columnFilters[column]}` : `All ${columnLabels[column]}`}
+                          </span>
+                          <FaChevronDown className={`ml-2 text-gray-400 transform transition-transform ${
+                            activeFilter === column ? 'rotate-180' : ''
+                          }`} />
+                        </button>
+                        {activeFilter === column && (
+                          <div className="absolute z-10 w-56 mt-1 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5">
+                            <div className="py-1">
                               <button
-                                key={value}
-                                className={`block w-full px-4 py-2 text-sm text-left ${
-                                  columnFilters[column] === value
-                                    ? 'bg-sky-50 text-sky-700 font-medium'
-                                    : 'text-gray-700 hover:bg-gray-50'
-                                }`}
+                                className="block w-full px-4 py-2 text-sm text-left text-gray-700 hover:bg-gray-100 border-b border-gray-100"
                                 onClick={() => {
-                                  setColumnFilters(prev => ({
-                                    ...prev,
-                                    [column]: value
-                                  }));
+                                  const newFilters = { ...columnFilters };
+                                  delete newFilters[column];
+                                  setColumnFilters(newFilters);
                                   setActiveFilter(null);
                                 }}
                               >
-                                {value}
+                                Show All
                               </button>
-                            ))}
+                              {uniqueValues[column]?.map(value => (
+                                <button
+                                  key={value}
+                                  className={`block w-full px-4 py-2 text-sm text-left ${
+                                    columnFilters[column] === value
+                                      ? 'bg-sky-50 text-sky-700 font-medium'
+                                      : 'text-gray-700 hover:bg-gray-50'
+                                  }`}
+                                  onClick={() => {
+                                    setColumnFilters(prev => ({
+                                      ...prev,
+                                      [column]: value
+                                    }));
+                                    setActiveFilter(null);
+                                  }}
+                                >
+                                  {value}
+                                </button>
+                              ))}
+                            </div>
                           </div>
-                        </div>
-                      )}
-                    </div>
-                  )}
+                        )}
+                      </>
+                    )}
+                  </div>
                 </th>
               ))}
               <th key="delete-header" className="border-b p-2 bg-sky-100 w-10">
