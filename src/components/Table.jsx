@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { ChevronUpIcon, ChevronDownIcon } from '@heroicons/react/20/solid';
-import { FaFileDownload, FaSearch, FaChevronDown, FaTrash, FaPlus } from 'react-icons/fa';
+import { FaFileDownload, FaSearch, FaChevronDown, FaTrash, FaPlus, FaCheck } from 'react-icons/fa';
 import generateEmployeeData, { getUniqueValues } from '../utils/mockData';
 import Papa from 'papaparse';
 
@@ -206,6 +206,7 @@ const DataTable = () => {
           <thead>
             {/* Filter row */}
             <tr>
+              <th key="select-header" className="border-b p-2 bg-sky-100 w-10"></th>
               <th key="add-header" className="border-b p-2 bg-sky-100"></th>
               {Object.keys(data[0]).map(column => (
                 <th key={`filter-${column}`} className="border-b p-2 bg-sky-100">
@@ -272,7 +273,7 @@ const DataTable = () => {
             </tr>
             {/* Header row */}
             <tr>
-              <th key="add-header" className="border-b p-3 bg-sky-100 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th key="add-header" className="border-b p-3 bg-sky-100 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-10">
                 <button
                   onClick={() => setShowAddModal(true)}
                   className="text-green-500 hover:text-green-700 transition-colors"
@@ -336,10 +337,15 @@ const DataTable = () => {
               <tr 
                 key={item.empId} 
                 className={`hover:bg-sky-50 transition-colors cursor-pointer ${
-                  selectedRows.has(item.empId) ? 'bg-sky-100' : ''
+                  selectedRows.has(item.empId) ? 'bg-sky-100 ring-1 ring-sky-300' : ''
                 }`}
                 onClick={() => toggleRowSelection(item.empId)}
               >
+                <td className="p-3 text-sm w-10">
+                  {selectedRows.has(item.empId) && (
+                    <FaCheck className="text-sky-500" />
+                  )}
+                </td>
                 <td className="p-3 text-sm"></td>
                 {Object.keys(item).map(key => (
                   <td key={key} className="p-3 text-sm">
