@@ -153,7 +153,7 @@ const DataTable = () => {
 
   return (
     <div className="p-4 max-w-7xl mx-auto">
-      {/* Search and Actions */}
+      {/* Search and Export */}
       <div className="mb-6 flex flex-col sm:flex-row justify-between gap-4">
         <div className="relative flex-1">
           <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
@@ -165,22 +165,13 @@ const DataTable = () => {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-        <div className="flex gap-2">
-          <button
-            onClick={() => setShowAddModal(true)}
-            className="flex items-center justify-center gap-2 bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors"
-          >
-            <FaPlus />
-            Add Employee
-          </button>
-          <button
-            onClick={exportToCSV}
-            className="flex items-center justify-center gap-2 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
-          >
-            <FaFileDownload />
-            Export to CSV
-          </button>
-        </div>
+        <button
+          onClick={exportToCSV}
+          className="flex items-center justify-center gap-2 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+        >
+          <FaFileDownload />
+          Export to CSV
+        </button>
       </div>
 
       {/* Table */}
@@ -189,6 +180,7 @@ const DataTable = () => {
           <thead>
             {/* Filter row */}
             <tr>
+              <th key="add-header" className="border-b p-2 bg-sky-100"></th>
               {Object.keys(data[0]).map(column => (
                 <th key={`filter-${column}`} className="border-b p-2 bg-sky-100">
                   <div className="relative">
@@ -250,10 +242,19 @@ const DataTable = () => {
                   </div>
                 </th>
               ))}
-              <th key="actions" className="border-b p-2 bg-sky-100"></th>
+              <th key="delete-header" className="border-b p-2 bg-sky-100"></th>
             </tr>
             {/* Header row */}
             <tr>
+              <th key="add-header" className="border-b p-3 bg-sky-100 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <button
+                  onClick={() => setShowAddModal(true)}
+                  className="text-green-500 hover:text-green-700 transition-colors"
+                  title="Add Employee"
+                >
+                  <FaPlus />
+                </button>
+              </th>
               {Object.keys(data[0]).map(column => (
                 <th
                   key={column}
@@ -293,12 +294,23 @@ const DataTable = () => {
                   />
                 </th>
               ))}
-              <th key="actions" className="border-b p-3 bg-sky-100 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer select-none relative"></th>
+              <th key="actions" className="border-b p-3 bg-sky-100 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Actions
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
             {paginatedData.map(item => (
               <tr key={item.empId} className="hover:bg-sky-50 transition-colors">
+                <td className="p-3 text-sm">
+                  <button
+                    onClick={() => setShowAddModal(true)}
+                    className="text-green-500 hover:text-green-700 transition-colors"
+                    title="Add Employee"
+                  >
+                    <FaPlus />
+                  </button>
+                </td>
                 {Object.keys(item).map(key => (
                   <td key={key} className="p-3 text-sm">
                     {item[key]}
