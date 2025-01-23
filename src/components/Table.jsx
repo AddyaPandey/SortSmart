@@ -213,28 +213,35 @@ const DataTable = () => {
           <thead>
             {/* Filter row */}
             <tr>
-              <th key="select-header" className="border-b p-2 bg-sky-100 w-10"></th>
-              <th key="add-header" className="border-b p-2 bg-sky-100"></th>
+              <th key="select-header" className="border-b p-2 bg-sky-100 w-10">
+                <button
+                  onClick={() => setShowAddModal(true)}
+                  className="text-green-500 hover:text-green-700 transition-colors"
+                  title="Add Employee"
+                >
+                  <FaPlus />
+                </button>
+              </th>
               {Object.keys(data[0]).map(column => (
                 <th key={`filter-${column}`} className="border-b p-2 bg-sky-100">
                   {!['email', 'empId'].includes(column) && (
-                    <div className="relative">
+                    <div className="relative px-3">
                       <button
-                        className="flex items-center justify-between w-full px-2 py-1 text-xs bg-white border rounded hover:bg-gray-50"
+                        className="flex items-center justify-between w-full px-3 py-1.5 text-xs bg-white border rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-colors"
                         onClick={() => setActiveFilter(activeFilter === column ? null : column)}
                       >
-                        <span className="text-gray-600">
-                          {columnFilters[column] ? `Filter: ${columnFilters[column]}` : 'Filter'}
+                        <span className="text-gray-600 font-medium">
+                          {columnFilters[column] ? `${columnFilters[column]}` : `All ${columnLabels[column]}`}
                         </span>
-                        <FaChevronDown className={`ml-1 transform transition-transform ${
+                        <FaChevronDown className={`ml-2 text-gray-400 transform transition-transform ${
                           activeFilter === column ? 'rotate-180' : ''
                         }`} />
                       </button>
                       {activeFilter === column && (
-                        <div className="absolute z-10 w-48 mt-1 bg-white rounded-md shadow-lg">
+                        <div className="absolute z-10 w-56 mt-1 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5">
                           <div className="py-1">
                             <button
-                              className="block w-full px-4 py-2 text-sm text-left text-gray-700 hover:bg-gray-100"
+                              className="block w-full px-4 py-2 text-sm text-left text-gray-700 hover:bg-gray-100 border-b border-gray-100"
                               onClick={() => {
                                 const newFilters = { ...columnFilters };
                                 delete newFilters[column];
@@ -242,15 +249,15 @@ const DataTable = () => {
                                 setActiveFilter(null);
                               }}
                             >
-                              Clear Filter
+                              Show All
                             </button>
                             {uniqueValues[column]?.map(value => (
                               <button
                                 key={value}
                                 className={`block w-full px-4 py-2 text-sm text-left ${
                                   columnFilters[column] === value
-                                    ? 'bg-blue-50 text-blue-700'
-                                    : 'text-gray-700 hover:bg-gray-100'
+                                    ? 'bg-sky-50 text-sky-700 font-medium'
+                                    : 'text-gray-700 hover:bg-gray-50'
                                 }`}
                                 onClick={() => {
                                   setColumnFilters(prev => ({
@@ -270,18 +277,20 @@ const DataTable = () => {
                   )}
                 </th>
               ))}
-              <th key="delete-header" className="border-b p-2 bg-sky-100"></th>
+              <th key="delete-header" className="border-b p-2 bg-sky-100 w-10">
+                <button
+                  onClick={handleDeleteSelected}
+                  className="text-red-500 hover:text-red-700 transition-colors"
+                  title="Delete Selected"
+                >
+                  <FaTrash />
+                </button>
+              </th>
             </tr>
             {/* Header row */}
             <tr>
-              <th key="add-header" className="border-b p-3 bg-sky-100 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-10">
-                <button
-                  onClick={() => setShowAddModal(true)}
-                  className="text-green-500 hover:text-green-700 transition-colors"
-                  title="Add Employee"
-                >
-                  <FaPlus />
-                </button>
+              <th key="select-header" className="border-b p-3 bg-sky-100 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-10">
+                Actions
               </th>
               {Object.keys(data[0]).map(column => (
                 <th
@@ -290,7 +299,7 @@ const DataTable = () => {
                   onClick={() => handleSort(column)}
                   style={{ width: columnWidths[column] }}
                 >
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 px-3">
                     {columnLabels[column]}
                     {sortConfig.key === column && (
                       sortConfig.direction === 'asc' ? <ChevronUpIcon className="w-4 h-4" /> : <ChevronDownIcon className="w-4 h-4" />
@@ -298,14 +307,8 @@ const DataTable = () => {
                   </div>
                 </th>
               ))}
-              <th key="actions" className="border-b p-3 bg-sky-100 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                <button
-                  onClick={handleDeleteSelected}
-                  className="text-red-500 hover:text-red-700 transition-colors"
-                  title="Delete Selected"
-                >
-                  <FaTrash />
-                </button>
+              <th key="actions" className="border-b p-3 bg-sky-100 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-10">
+                Actions
               </th>
             </tr>
           </thead>
@@ -323,13 +326,12 @@ const DataTable = () => {
                     <FaCheck className="text-sky-500" />
                   )}
                 </td>
-                <td className="p-3 text-sm"></td>
                 {Object.keys(item).map(key => (
-                  <td key={key} className="p-3 text-sm">
+                  <td key={key} className="p-3 text-sm px-3">
                     {item[key]}
                   </td>
                 ))}
-                <td className="p-3 text-sm"></td>
+                <td className="p-3 text-sm w-10"></td>
               </tr>
             ))}
           </tbody>
