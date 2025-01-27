@@ -1,19 +1,19 @@
 # SortSmart: Interactive Data Table
 
-A modern, responsive data table solution built with React.js and TailwindCSS.
+A modern and responsive data table solution built with React.js and TailwindCSS.
 
 ## Features
 
 - Smart global search across all columns
-- Column-specific filters with dropdowns
-- Sort any column (ascending/descending)
-- Add new employees with a user-friendly modal
+- Column specific filters with dropdowns
+- Sort any column (ascending or descending)
+- Add new employees with a user friendly modal
 - Delete employees with confirmation
 - Responsive and mobile-friendly design
 - Resizable columns
 - Export to CSV
 - Pagination
-- Clean, modern UI with light sky blue theme
+- Clean and modern UI with light sky blue theme
 
 ## Tech Stack
 
@@ -50,7 +50,7 @@ A modern, responsive data table solution built with React.js and TailwindCSS.
 ### Column Filters
 - Click the filter button in any column header
 - Select from available options in the dropdown
-- Filter by:
+- Filter by-
   - Department (Frontend Dev, Backend Dev, UI/UX Design, QA Testing, DevOps)
   - Location (Mumbai, Bangalore, Delhi, Hyderabad, Pune, Chennai)
   - Work Mode (In-Office, Remote, Hybrid, On-Site)
@@ -62,22 +62,12 @@ A modern, responsive data table solution built with React.js and TailwindCSS.
 - Visual indicators show current sort direction
 
 ### Adding Employees
-- Click "Add Employee" button
-- Fill in the required details in the modal
-- Email is optional (will be generated from name if not provided)
-- All other fields are required
+- Click the delete "+" icon in the Actions column
+- Fill in the required details
+- All the fields are required
 
 ### Deleting Employees
-- Click the delete (trash) icon in the Actions column
-- Confirm deletion in the popup dialog
+- Click the delete "-" icon in the Actions column
 
 ### Export
 - Click "Export to CSV" to download current filtered data
-
-## License
-
-MIT License
-
-## Contributing
-
-Contributions, issues, and feature requests are welcome!
